@@ -1,5 +1,5 @@
-const mysql = require("mysql");
-require("dotenv").config();
+const mysql = require("mysql"); // Import mysql
+require("dotenv").config(); // Import dotenv
 
 // Create a single connection pool directly from config
 const db = mysql.createPool({
@@ -20,4 +20,4 @@ db.getConnection((err, connection) => {
   console.log("✅ Connected to MySQL database.");
 });
 
-module.exports = db;
+module.exports = db; // Export the connection pool

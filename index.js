@@ -1,16 +1,16 @@
-require('dotenv').config();
-const express = require('express');
-const app = express();
+require('dotenv').config(); //import dotenv
+const express = require('express'); // Import express
+const app = express(); // Create an instance of express
+const cors = require('cors'); // CORS middleware
 const port = process.env.PORT || 3000;
-const cors = require('cors');
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Routes
-const userRoutes = require('./routes/authRoutes.js');
-app.use(userRoutes);
+const userRoutes = require('./routes/authRoutes.js'); // Import user routes
+app.use(userRoutes); // Use user routes
 
 
 
