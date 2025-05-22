@@ -1,13 +1,9 @@
-const express = require('express')
+const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middleware/authMiddleware');
+const authControllers = require('../controllers/authController');
 
-router.post('/register', async (req, res) => {
-    const {username, password} = req.body;
-    try{
+router.post('/login',authMiddleware, authControllers.login);
+router.get('/protected', authMiddleware, authControllers.getProtectedData);
 
-
-    } catch{
-
-    }
-})
-module.exports = router; // Export the router
+module.exports = router;
