@@ -1,34 +1,77 @@
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const connection = require('../confiq/db');
 
-// Simulate DB user for this example
-const mockUser = {
-  id: 1,
-  username: 'john',
-  passwordHash: bcrypt.hashSync('password123', 10),
-};
-
-// Login controller
-exports.login = (req, res) => {
+const register = (req, res) => {
   const { username, password } = req.body;
 
-  if (username !== mockUser.username) {
-    return res.status(401).json({ message: 'Invalid username' });
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Please provide username and password' });
   }
 
-  const isMatch = bcrypt.compareSync(password, mockUser.passwordHash);
-  if (!isMatch) {
-    return res.status(401).json({ message: 'Invalid password' });
-  }
+  // Check if user exists
+  connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error' });
+    }
+    if (results.length > 0) {
+      return res.status(400).json({ message: 'Username already exists' });
+    }
 
-  const token = jwt.sign({ id: mockUser.id, username: mockUser.username }, process.env.JWT_SECRET, {
-    expiresIn: '1h',
+    // Hash password and save user
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error hashing password' });
+      }
+
+      connection.query(
+        'INSERT INTO users (username, password) VALUES (?, ?)',
+        [username, hashedPassword],
+        (err) => {
+          if (err) {
+            return res.status(500).json({ message: 'Error registering user' });
+          }
+          res.status(201).json({ message: 'User registered successfully' });
+        }
+      );
+    });
   });
-
-  res.json({ token });
 };
 
-// Protected route controller
-exports.getProtectedData = (req, res) => {
-  res.json({ message: 'You have accessed protected data!', user: req.user });
+const login = (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Please provide username and password' });
+  }
+
+  // Find user
+  connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error' });
+    }
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const user = results[0];
+
+    // Compare password
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error comparing passwords' });
+      }
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Generate JWT
+      const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, {
+        expiresIn: '1h'
+      });
+      res.json({ token });
+    });
+  });
 };
+
+module.exports = { register, login };
