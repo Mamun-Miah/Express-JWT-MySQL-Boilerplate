@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const connection = require('../confiq/db');
 
+
+
 const register = (req, res) => {
   const { username, password } = req.body;
 

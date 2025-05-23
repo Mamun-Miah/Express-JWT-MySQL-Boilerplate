@@ -6,9 +6,6 @@ const authenticateToken = require('../middleware/authMiddleware');
 router.post('/register', register);
 router.post('/login', login);
 
-// Example protected route
-router.get('/protected', authenticateToken, (req, res) => {
-  res.json({ message: 'This is a protected route', user: req.user });
-});
+
 
 module.exports = router;
