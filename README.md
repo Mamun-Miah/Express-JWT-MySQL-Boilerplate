@@ -1,6 +1,6 @@
 **Boilerplate for Express Js with JWT and mysql2**
 npm init -y                    
-npm install express jsonwebtoken dotenv bcrypt mysql2 cors
+npm install express jsonwebtoken dotenv bcrypt mysql2 cors bcryptjs mysql
 npm install --save-dev nodemon 
 
 Then Create *index.js* file 
